@@ -1,4 +1,4 @@
-require File.expand_path('lib/combiner',File.dirname(__FILE__))
+require_relative 'lib/combiner'
 require 'csv'
 require 'date'
 
@@ -31,7 +31,6 @@ class Float
 end
 
 class Modifier
-
 	KEYWORD_UNIQUE_ID = 'Keyword Unique ID'
 	LAST_VALUE_WINS = ['Account ID', 'Account Name', 'Campaign', 'Ad Group', 'Keyword', 'Keyword Type', 'Subid', 'Paused', 'Max CPC', 'Keyword Unique ID', 'ACCOUNT', 'CAMPAIGN', 'BRAND', 'BRAND+CATEGORY', 'ADGROUP', 'KEYWORD']
 	LAST_REAL_VALUE_WINS = ['Last Avg CPC', 'Last Avg Pos']
@@ -167,6 +166,7 @@ class Modifier
 	end
 
 	public
+
 	def sort(file)
 		output = "#{file}.sorted"
 		content_as_table = parse(file)
