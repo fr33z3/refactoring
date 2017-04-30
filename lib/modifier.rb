@@ -25,11 +25,8 @@ class Modifier
   def modify(output, input)
     @input = input
 
-    combiner = Combiner.new do |value|
-      value[KEYWORD_UNIQUE_ID]
-    end.combine(input_enum)
+    merger = Merger.new(modifiers, combiner).to_enum(:each)
 
-    merger = get_merger(combiner)
     done = false
     file_index = 0
     file_name = output.gsub('.txt', '')
@@ -59,36 +56,11 @@ class Modifier
     file_manager.read_sorted(@input, sort_key).each
   end
 
-  def get_merger(combiner)
-    Enumerator.new do |yielder|
-      while true
-        begin
-          merged = combine_hashes(combiner.next)
-          yielder.yield(combine_values(merged))
-        rescue StopIteration
-          break
-        end
-      end
-    end
+  def combiner
+    Combiner.new do |value|
+      value[KEYWORD_UNIQUE_ID]
+    end.combine(input_enum)
   end
-
-  def combine_values(hash)
-    modifiers.inject(hash) do |res, modifier|
-      modifier.modify(res)
-    end
-  end
-
-  def combine_hashes(list_of_rows)
-    list_of_rows.each_with_object({}) do |row, res|
-      unless row.nil?
-        row.each do |key, value|
-          (res[key] ||= []) << value
-        end
-      end
-    end
-  end
-
-  public
 
   def modifiers
     [
