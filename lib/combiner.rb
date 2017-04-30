@@ -4,18 +4,18 @@
 # - block combining two elements having the same key or a single element, if there is no partner
 # output:
 # - enumerator for the combined elements
+
 class Combiner
-  def initialize(&extractor)
+  include Enumerable
+
+  def initialize(*enumerators, &extractor)
     @extractor = extractor
+    @enumerators = enumerators
   end
 
-  def combine(*enumerators)
-    @enumerators = enumerators
-
-    Enumerator.new do |yielder|
-      while values.any?
-        yielder.yield iteration_values!
-      end
+  def each
+    while values.any?
+      yield iteration_values!
     end
   end
 

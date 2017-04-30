@@ -57,9 +57,7 @@ class Modifier
   end
 
   def combiner
-    Combiner.new do |value|
-      value[KEYWORD_UNIQUE_ID]
-    end.combine(input_enum)
+    Combiner.new(input_enum) { |value| value[KEYWORD_UNIQUE_ID] }
   end
 
   def modifiers
