@@ -14,10 +14,7 @@ class Combiner
 
     Enumerator.new do |yielder|
       while values.any?
-        yielder.yield iteration_values
-        iteration_values.each_with_index do |value, index|
-          enumerators[index].next if value
-        end
+        yielder.yield iteration_values!
       end
     end
   end
@@ -26,20 +23,30 @@ class Combiner
 
   attr_reader :extractor, :enumerators
 
+  def get_value(enumerator)
+    enumerator.peek
+  rescue StopIteration
+    nil
+  end
+
   def values
-    enumerators.map do |enum|
-      begin
-        enum.peek
-      rescue StopIteration
-        nil
-      end
+    enumerators.map{|enum| get_value(enum)}
+  end
+
+  def min_value
+    values.compact.min do |a, b|
+      extractor.call(a) <=> extractor.call(b)
     end
   end
 
-  def iteration_values
-    min_value = values.compact.min do |a, b|
-    	extractor.call(a) <=> extractor.call(b)
+  def iteration_values!
+    min = min_value
+    enumerators.map do |enum|
+      value = get_value(enum)
+      if value == min
+        enum.next
+        value
+      end
     end
-    values.map {|value| value == min_value ? value : nil}
   end
 end
