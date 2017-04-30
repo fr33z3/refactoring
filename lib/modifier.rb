@@ -15,16 +15,21 @@ class Modifier
 
   LINES_PER_FILE = 120000
 
-  def initialize(saleamount_factor, cancellation_factor, file_manager = CSVFileManager.new)
+  def initialize(saleamount_factor, cancellation_factor, sort_key, file_manager = CSVFileManager.new)
     @saleamount_factor = saleamount_factor
     @cancellation_factor = cancellation_factor
     @file_manager = file_manager
+    @sort_key = sort_key
   end
 
   def modify(output, input)
-    input_enumerator = file_manager.lazy_read(input)
+    @input = input
 
-    merger = get_merger(combiner(input))
+    combiner = Combiner.new do |value|
+      value[KEYWORD_UNIQUE_ID]
+    end.combine(input_enum)
+
+    merger = get_merger(combiner)
     done = false
     file_index = 0
     file_name = output.gsub('.txt', '')
@@ -48,15 +53,10 @@ class Modifier
 
   private
 
-  attr_reader :file_manager, :cancellation_factor, :saleamount_factor
+  attr_reader :file_manager, :cancellation_factor, :saleamount_factor, :sort_key
 
-  def combiner(input)
-    input = sort(input)
-    input_enumerator = file_manager.lazy_read(input)
-
-    Combiner.new do |value|
-      value[KEYWORD_UNIQUE_ID]
-    end.combine(input_enumerator)
+  def input_enum
+    file_manager.read_sorted(@input, sort_key).each
   end
 
   def get_merger(combiner)
@@ -99,15 +99,5 @@ class Modifier
       Modifiers::Factor.new(cancellation_factor, CANCELATION_KEYS),
       Modifiers::Factor.new(cancellation_factor * saleamount_factor, CANCELATION_SALE_KEYS)
     ]
-  end
-
-  def sort(file)
-    output = "#{file}.sorted"
-    content_as_table = file_manager.read(file)
-    headers = content_as_table.headers
-    index_of_key = headers.index('Clicks')
-    content = content_as_table.sort_by { |a| -a[index_of_key].to_i }
-    file_manager.write(output, headers, content)
-    return output
   end
 end

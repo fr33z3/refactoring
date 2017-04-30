@@ -57,6 +57,5 @@ RSpec.describe CSVFileManager do
       it { is_expected.to have_received(:<<).with(rows[0]) }
       it { is_expected.to have_received(:<<).with(rows[1]) }
     end
-
   end
 end

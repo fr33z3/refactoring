@@ -26,7 +26,7 @@ def latest(name)
 end
 
 modified = input = latest('project_2012-07-27_2012-10-10_performancedata')
-modifier = Modifier.new(MODIFICATION_FACTOR, CANCELATION_FACTOR)
+modifier = Modifier.new(MODIFICATION_FACTOR, CANCELATION_FACTOR, 'Clicks')
 modifier.modify(modified, input)
 
 puts "DONE modifying"

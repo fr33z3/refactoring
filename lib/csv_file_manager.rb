@@ -16,6 +16,12 @@ class CSVFileManager
     CSV.read(file_path, options)
   end
 
+  def read_sorted(file_path, sort_key)
+    content = read(file_path)
+    sort_index = content.headers.index(sort_key)
+    content.sort_by {|row| -row[sort_index].to_i }
+  end
+
   def lazy_read(file_path)
     Enumerator.new do |yielder|
       CSV.foreach(file_path, options) do |row|
