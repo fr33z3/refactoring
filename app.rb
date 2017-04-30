@@ -5,6 +5,9 @@ require_relative 'lib/csv_file_manager'
 require 'csv'
 require 'date'
 
+MODIFICATION_FACTOR = 1
+CANCELATION_FACTOR = 0.4
+
 def latest(name)
   files = Dir[File.expand_path("../test_data/*#{name}*.txt", __FILE__)]
 
@@ -23,9 +26,7 @@ def latest(name)
 end
 
 modified = input = latest('project_2012-07-27_2012-10-10_performancedata')
-modification_factor = 1
-cancellaction_factor = 0.4
-modifier = Modifier.new(modification_factor, cancellaction_factor)
+modifier = Modifier.new(MODIFICATION_FACTOR, CANCELATION_FACTOR)
 modifier.modify(modified, input)
 
 puts "DONE modifying"

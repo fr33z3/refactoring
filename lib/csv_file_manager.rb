@@ -8,8 +8,8 @@ class CSVFileManager
     :row_sep => "\r\n"
   }
 
-  def initialize(options = {})
-    @options = DEFAULT_CSV_OPTIONS.merge(options)
+  def initialize(options = nil)
+    @options = options || DEFAULT_CSV_OPTIONS
   end
 
   def read(file_path)

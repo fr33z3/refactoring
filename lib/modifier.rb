@@ -1,3 +1,4 @@
+require 'pry'
 require 'csv'
 require_relative './combiner'
 require_relative './csv_file_manager'
@@ -21,26 +22,9 @@ class Modifier
   end
 
   def modify(output, input)
-    input = sort(input)
-
     input_enumerator = file_manager.lazy_read(input)
 
-    combiner = Combiner.new do |value|
-      value[KEYWORD_UNIQUE_ID]
-    end.combine(input_enumerator)
-
-    merger = Enumerator.new do |yielder|
-      while true
-        begin
-          list_of_rows = combiner.next
-          merged = combine_hashes(list_of_rows)
-          yielder.yield(combine_values(merged))
-        rescue StopIteration
-          break
-        end
-      end
-    end
-
+    merger = get_merger(combiner(input))
     done = false
     file_index = 0
     file_name = output.gsub('.txt', '')
@@ -66,39 +50,43 @@ class Modifier
 
   attr_reader :file_manager, :cancellation_factor, :saleamount_factor
 
-  def combine(merged)
-    result = []
-    merged.each do |_, hash|
-      result << combine_values(hash)
+  def combiner(input)
+    input = sort(input)
+    input_enumerator = file_manager.lazy_read(input)
+
+    Combiner.new do |value|
+      value[KEYWORD_UNIQUE_ID]
+    end.combine(input_enumerator)
+  end
+
+  def get_merger(combiner)
+    Enumerator.new do |yielder|
+      while true
+        begin
+          merged = combine_hashes(combiner.next)
+          yielder.yield(combine_values(merged))
+        rescue StopIteration
+          break
+        end
+      end
     end
-    result
   end
 
   def combine_values(hash)
     modifiers.inject(hash) do |res, modifier|
       modifier.modify(res)
     end
- end
-
-  def combine_hashes(list_of_rows)
-    keys = []
-    list_of_rows.each do |row|
-      next if row.nil?
-      row.headers.each do |key|
-        keys << key
-      end
-    end
-    result = {}
-    keys.each do |key|
-      result[key] = []
-      list_of_rows.each do |row|
-        result[key] << (row.nil? ? nil : row[key])
-      end
-    end
-    result
   end
 
-  DEFAULT_CSV_OPTIONS = { :col_sep => "\t", :headers => :first_row }
+  def combine_hashes(list_of_rows)
+    list_of_rows.each_with_object({}) do |row, res|
+      unless row.nil?
+        row.each do |key, value|
+          (res[key] ||= []) << value
+        end
+      end
+    end
+  end
 
   public
 
@@ -107,6 +95,7 @@ class Modifier
       Modifiers::LastValueWins.new(LAST_VALUE_WIN_KEYS),
       Modifiers::LastValueWins.new(LAST_REAL_VALUE_WIN_KEYS),
       Modifiers::IntValues.new(INT_VALUE_KEYS),
+      Modifiers::FloatValues.new(FLOAT_VALUE_KEYS),
       Modifiers::Factor.new(cancellation_factor, CANCELATION_KEYS),
       Modifiers::Factor.new(cancellation_factor * saleamount_factor, CANCELATION_SALE_KEYS)
     ]
