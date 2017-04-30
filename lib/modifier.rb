@@ -1,13 +1,16 @@
 require 'csv'
 require_relative './combiner'
 require_relative './csv_file_manager'
+require_relative './modifiers'
 
 class Modifier
   KEYWORD_UNIQUE_ID = 'Keyword Unique ID'
-  LAST_VALUE_WINS = ['Account ID', 'Account Name', 'Campaign', 'Ad Group', 'Keyword', 'Keyword Type', 'Subid', 'Paused', 'Max CPC', 'Keyword Unique ID', 'ACCOUNT', 'CAMPAIGN', 'BRAND', 'BRAND+CATEGORY', 'ADGROUP', 'KEYWORD']
-  LAST_REAL_VALUE_WINS = ['Last Avg CPC', 'Last Avg Pos']
-  INT_VALUES = ['Clicks', 'Impressions', 'ACCOUNT - Clicks', 'CAMPAIGN - Clicks', 'BRAND - Clicks', 'BRAND+CATEGORY - Clicks', 'ADGROUP - Clicks', 'KEYWORD - Clicks']
-  FLOAT_VALUES = ['Avg CPC', 'CTR', 'Est EPC', 'newBid', 'Costs', 'Avg Pos']
+  LAST_VALUE_WIN_KEYS = ['Account ID', 'Account Name', 'Campaign', 'Ad Group', 'Keyword', 'Keyword Type', 'Subid', 'Paused', 'Max CPC', 'Keyword Unique ID', 'ACCOUNT', 'CAMPAIGN', 'BRAND', 'BRAND+CATEGORY', 'ADGROUP', 'KEYWORD']
+  LAST_REAL_VALUE_WIN_KEYS = ['Last Avg CPC', 'Last Avg Pos']
+  INT_VALUE_KEYS = ['Clicks', 'Impressions', 'ACCOUNT - Clicks', 'CAMPAIGN - Clicks', 'BRAND - Clicks', 'BRAND+CATEGORY - Clicks', 'ADGROUP - Clicks', 'KEYWORD - Clicks']
+  FLOAT_VALUE_KEYS = ['Avg CPC', 'CTR', 'Est EPC', 'newBid', 'Costs', 'Avg Pos']
+  CANCELATION_KEYS = ['number of commissions']
+  CANCELATION_SALE_KEYS = ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value']
 
   LINES_PER_FILE = 120000
 
@@ -61,7 +64,7 @@ class Modifier
 
   private
 
-  attr_reader :file_manager
+  attr_reader :file_manager, :cancellation_factor, :saleamount_factor
 
   def combine(merged)
     result = []
@@ -72,28 +75,10 @@ class Modifier
   end
 
   def combine_values(hash)
-    # puts hash.inspect
-    LAST_VALUE_WINS.each do |key|
-      hash[key] = hash[key].last
+    modifiers.inject(hash) do |res, modifier|
+      modifier.modify(res)
     end
-    LAST_REAL_VALUE_WINS.each do |key|
-      hash[key] = hash[key].select {|v| not (v.nil? or v == 0 or v == '0' or v == '')}.last
-    end
-    INT_VALUES.each do |key|
-      hash[key] = hash[key][0].to_s
-    end
-    FLOAT_VALUES.each do |key|
-      hash[key] = hash[key][0].from_german_to_f.to_german_s
-    end
-    ['number of commissions'].each do |key|
-      hash[key] = (@cancellation_factor * hash[key][0].from_german_to_f).to_german_s
-    end
-    ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value'].each do |key|
-      hash[key] = (@cancellation_factor * @saleamount_factor * hash[key][0].from_german_to_f).to_german_s
-    end
-    # puts hash.inspect
-    hash
-  end
+ end
 
   def combine_hashes(list_of_rows)
     keys = []
@@ -116,6 +101,16 @@ class Modifier
   DEFAULT_CSV_OPTIONS = { :col_sep => "\t", :headers => :first_row }
 
   public
+
+  def modifiers
+    [
+      Modifiers::LastValueWins.new(LAST_VALUE_WIN_KEYS),
+      Modifiers::LastValueWins.new(LAST_REAL_VALUE_WIN_KEYS),
+      Modifiers::IntValues.new(INT_VALUE_KEYS),
+      Modifiers::Factor.new(cancellation_factor, CANCELATION_KEYS),
+      Modifiers::Factor.new(cancellation_factor * saleamount_factor, CANCELATION_SALE_KEYS)
+    ]
+  end
 
   def sort(file)
     output = "#{file}.sorted"
