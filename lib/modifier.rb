@@ -41,20 +41,14 @@ class Modifier
     done = false
     file_index = 0
     file_name = output.gsub('.txt', '')
+    headers = merger.peek.keys
     while not done do
-      CSV.open(file_name + "_#{file_index}.txt", "wb", { :col_sep => "\t", :headers => :first_row, :row_sep => "\r\n" }) do |csv|
-        headers_written = false
+      file_manager.write(file_name + "_#{file_index}.txt", headers) do |csv|
         line_count = 0
         while line_count < LINES_PER_FILE
           begin
-            merged = merger.next
-            if not headers_written
-              csv << merged.keys
-              headers_written = true
-              line_count +=1
-            end
-            csv << merged
-            line_count +=1
+            csv << merger.next.values
+            line_count += 1
           rescue StopIteration
             done = true
             break

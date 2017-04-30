@@ -24,10 +24,14 @@ class CSVFileManager
     end
   end
 
-  def write(file_path, headers, content)
+  def write(file_path, headers, content = nil)
     CSV.open(file_path, "wb", options) do |csv|
       csv << headers
-      content.each{|row| csv << row}
+      if block_given?
+        yield csv
+      elsif content
+        content.each{|row| csv << row}
+      end
     end
   end
 
