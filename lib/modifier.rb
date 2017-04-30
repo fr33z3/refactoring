@@ -1,6 +1,6 @@
 require 'csv'
 require_relative './combiner'
-require_relative './extensions'
+require_relative './csv_file_manager'
 
 class Modifier
   KEYWORD_UNIQUE_ID = 'Keyword Unique ID'
@@ -11,15 +11,16 @@ class Modifier
 
   LINES_PER_FILE = 120000
 
-  def initialize(saleamount_factor, cancellation_factor)
+  def initialize(saleamount_factor, cancellation_factor, file_manager = CSVFileManager.new)
     @saleamount_factor = saleamount_factor
     @cancellation_factor = cancellation_factor
+    @file_manager = file_manager
   end
 
   def modify(output, input)
     input = sort(input)
 
-    input_enumerator = lazy_read(input)
+    input_enumerator = file_manager.lazy_read(input)
 
     combiner = Combiner.new do |value|
       value[KEYWORD_UNIQUE_ID]
@@ -66,6 +67,8 @@ class Modifier
 
   private
 
+  attr_reader :file_manager
+
   def combine(merged)
     result = []
     merged.each do |_, hash|
@@ -75,6 +78,7 @@ class Modifier
   end
 
   def combine_values(hash)
+    # puts hash.inspect
     LAST_VALUE_WINS.each do |key|
       hash[key] = hash[key].last
     end
@@ -93,6 +97,7 @@ class Modifier
     ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value'].each do |key|
       hash[key] = (@cancellation_factor * @saleamount_factor * hash[key][0].from_german_to_f).to_german_s
     end
+    # puts hash.inspect
     hash
   end
 
@@ -116,36 +121,15 @@ class Modifier
 
   DEFAULT_CSV_OPTIONS = { :col_sep => "\t", :headers => :first_row }
 
-  def parse(file)
-    CSV.read(file, DEFAULT_CSV_OPTIONS)
-  end
-
-  def lazy_read(file)
-    Enumerator.new do |yielder|
-      CSV.foreach(file, DEFAULT_CSV_OPTIONS) do |row|
-        yielder.yield(row)
-      end
-    end
-  end
-
-  def write(content, headers, output)
-    CSV.open(output, "wb", { :col_sep => "\t", :headers => :first_row, :row_sep => "\r\n" }) do |csv|
-      csv << headers
-      content.each do |row|
-        csv << row
-      end
-    end
-  end
-
   public
 
   def sort(file)
     output = "#{file}.sorted"
-    content_as_table = parse(file)
+    content_as_table = file_manager.read(file)
     headers = content_as_table.headers
     index_of_key = headers.index('Clicks')
     content = content_as_table.sort_by { |a| -a[index_of_key].to_i }
-    write(content, headers, output)
+    file_manager.write(output, headers, content)
     return output
   end
 end

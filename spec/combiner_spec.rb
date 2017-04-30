@@ -6,10 +6,6 @@ describe Combiner do
   let(:input_enumerators) { [] }
   let(:combiner) { Combiner.new(&key_extractor) }
 
-  def enumerator_for(*array)
-    array.to_enum :each
-  end
-
   context "#combine" do
     subject { combiner.combine(*input_enumerators) }
 

@@ -1,4 +1,6 @@
 require_relative 'lib/modifier'
+require_relative 'lib/extensions'
+require_relative 'lib/csv_file_manager'
 require 'csv'
 require 'date'
 

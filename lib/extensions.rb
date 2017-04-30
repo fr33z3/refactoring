@@ -9,3 +9,9 @@ class Float
     self.to_s.gsub('.', ',')
   end
 end
+
+class Hash
+  def slice(keys)
+    select {|key,_| keys.include? key}
+  end
+end
