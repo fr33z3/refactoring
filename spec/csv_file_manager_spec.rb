@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 RSpec.describe CSVFileManager do
-  let(:file_path) { "dummy_file_path.txt" }
+  let(:file_path) { 'dummy_file_path.txt' }
   let(:default_options) { described_class::DEFAULT_CSV_OPTIONS }
   let(:manager) { described_class.new }
   let(:rows) { [double('Row1'), double('Row2')] }
-  let(:headers) { ['Header1', 'Header2'] }
+  let(:headers) { %w[Header1 Header2] }
   let(:csv) { spy('CSV') }
 
   describe '#read' do

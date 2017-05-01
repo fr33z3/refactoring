@@ -1,4 +1,4 @@
-$:.unshift File.expand_path('lib/', File.dirname(__FILE__))
+$LOAD_PATH.unshift File.expand_path('lib/', File.dirname(__FILE__))
 require_relative 'lib/modifier'
 require_relative 'lib/extensions'
 require_relative 'lib/csv_file_manager'
@@ -14,7 +14,7 @@ def latest(name)
 
   files.sort_by! do |file|
     last_date = /\d+-\d+-\d+_.+\.txt$/.match file
-    last_date = last_date.to_s.match /\d+-\d+-\d+/
+    last_date = last_date.to_s.match(/\d+-\d+-\d+/)
 
     date = DateTime.parse(last_date.to_s)
     date
@@ -41,4 +41,4 @@ output_writer = SplittedWriter.new(file_manager, output_file)
 modifier = Modifier.new(MODIFICATION_FACTOR, CANCELATION_FACTOR)
 modifier.modify(inputs, output_writer)
 
-puts "DONE modifying"
+puts 'DONE modifying'

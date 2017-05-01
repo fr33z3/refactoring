@@ -1,5 +1,5 @@
 class SplittedWriter
-  def initialize(file_manager, file_name, max_lines = 120000)
+  def initialize(file_manager, file_name, max_lines = 120_000)
     @file_manager = file_manager
     @file_name = file_name
     @max_lines = max_lines
@@ -19,10 +19,10 @@ class SplittedWriter
   end
 
   def close
-    if file
-      file.close
-      @file = nil
-    end
+    return unless file
+
+    file.close
+    @file = nil
   end
 
   private

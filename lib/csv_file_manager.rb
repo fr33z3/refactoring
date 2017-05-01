@@ -3,10 +3,10 @@ require_relative './extensions'
 
 class CSVFileManager
   DEFAULT_CSV_OPTIONS = {
-    :col_sep => "\t",
-    :headers => :first_row,
-    :row_sep => "\r\n"
-  }
+    col_sep: "\t",
+    headers: :first_row,
+    row_sep: "\r\n"
+  }.freeze
 
   def initialize(options = nil)
     @options = options || DEFAULT_CSV_OPTIONS
@@ -19,7 +19,7 @@ class CSVFileManager
   def read_sorted(file_path, sort_key)
     content = read(file_path)
     sort_index = content.headers.index(sort_key)
-    content.sort_by {|row| -row[sort_index].to_i }
+    content.sort_by { |row| -row[sort_index].to_i }
   end
 
   def lazy_read(file_path)
@@ -35,9 +35,6 @@ class CSVFileManager
   end
 
   private
-
-  def csv_read_options
-  end
 
   attr_reader :file_path, :options
 end

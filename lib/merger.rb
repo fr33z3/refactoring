@@ -23,10 +23,10 @@ class Merger
 
   def combine_hashes(list_of_rows)
     list_of_rows.each_with_object({}) do |row, res|
-      unless row.nil?
-        row.each do |key, value|
-          (res[key] ||= []) << value
-        end
+      next unless row
+
+      row.each do |key, value|
+        (res[key] ||= []) << value
       end
     end
   end

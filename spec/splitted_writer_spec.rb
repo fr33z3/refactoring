@@ -11,7 +11,7 @@ RSpec.describe SplittedWriter do
   let(:row) { double('Row', keys: headers, values: values) }
 
   subject do
-    (1..4).each { writer.write(row) }
+    4.times.each { writer.write(row) }
     writer.close
   end
 

@@ -1,3 +1,4 @@
+# rubocop:disable LineLength
 RSpec::Matchers.define :be_empty do
   match do |enumerator|
     read_from_enumerator(enumerator).empty?
@@ -16,3 +17,4 @@ RSpec::Matchers.define :return_elements do |*expected|
     "expected that #{enumerator} would return #{expected.inspect}, but it returned #{read_elements.inspect}"
   end
 end
+# rubocop:enable LineLength

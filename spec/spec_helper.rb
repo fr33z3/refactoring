@@ -1,4 +1,4 @@
-$:.unshift File.expand_path('../lib/', File.dirname(__FILE__))
+$LOAD_PATH.unshift File.expand_path('../lib/', File.dirname(__FILE__))
 Dir[File.expand_path('../../lib/*.rb', __FILE__)].each do |file|
   require file
 end

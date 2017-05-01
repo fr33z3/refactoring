@@ -5,13 +5,24 @@ require_relative './csv_file_manager'
 require_relative './modifiers'
 
 class Modifier
-  KEYWORD_UNIQUE_ID = 'Keyword Unique ID'
-  LAST_VALUE_WIN_KEYS = ['Account ID', 'Account Name', 'Campaign', 'Ad Group', 'Keyword', 'Keyword Type', 'Subid', 'Paused', 'Max CPC', 'Keyword Unique ID', 'ACCOUNT', 'CAMPAIGN', 'BRAND', 'BRAND+CATEGORY', 'ADGROUP', 'KEYWORD']
-  LAST_REAL_VALUE_WIN_KEYS = ['Last Avg CPC', 'Last Avg Pos']
-  INT_VALUE_KEYS = ['Clicks', 'Impressions', 'ACCOUNT - Clicks', 'CAMPAIGN - Clicks', 'BRAND - Clicks', 'BRAND+CATEGORY - Clicks', 'ADGROUP - Clicks', 'KEYWORD - Clicks']
-  FLOAT_VALUE_KEYS = ['Avg CPC', 'CTR', 'Est EPC', 'newBid', 'Costs', 'Avg Pos']
-  CANCELATION_KEYS = ['number of commissions']
-  CANCELATION_SALE_KEYS = ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value']
+  KEYWORD_UNIQUE_ID = 'Keyword Unique ID'.freeze
+  LAST_VALUE_WIN_KEYS = [
+    'Account ID', 'Account Name', 'Campaign', 'Ad Group', 'Keyword', 'Keyword Type',
+    'Subid', 'Paused', 'Max CPC', 'Keyword Unique ID', 'ACCOUNT', 'CAMPAIGN', 'BRAND',
+    'BRAND+CATEGORY', 'ADGROUP', 'KEYWORD'
+  ].freeze
+  LAST_REAL_VALUE_WIN_KEYS = ['Last Avg CPC', 'Last Avg Pos'].freeze
+  INT_VALUE_KEYS = [
+    'Clicks', 'Impressions', 'ACCOUNT - Clicks', 'CAMPAIGN - Clicks', 'BRAND - Clicks',
+    'BRAND+CATEGORY - Clicks', 'ADGROUP - Clicks', 'KEYWORD - Clicks'
+  ].freeze
+  FLOAT_VALUE_KEYS = ['Avg CPC', 'CTR', 'Est EPC', 'newBid', 'Costs', 'Avg Pos'].freeze
+  CANCELATION_KEYS = ['number of commissions'].freeze
+  CANCELATION_SALE_KEYS = [
+    'Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value',
+    'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value',
+    'ADGROUP - Commission Value', 'KEYWORD - Commission Value'
+  ].freeze
 
   def initialize(saleamount_factor, cancellation_factor)
     @saleamount_factor = saleamount_factor

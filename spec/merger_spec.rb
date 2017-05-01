@@ -17,15 +17,15 @@ RSpec.describe Merger do
 
   it 'merges data' do
     subject.to_a
-    expect(modifier).to have_received(:modify).with({
+    expect(modifier).to have_received(:modify).with(
       'Key 1' => [1, 3],
       'Key 2' => [2, 4]
-    })
+    )
 
-    expect(modifier).to have_received(:modify).with({
+    expect(modifier).to have_received(:modify).with(
       'Key 1' => [5, 7],
       'Key 2' => [6, 8]
-    })
+    )
   end
 
   it 'returns merged and combined values' do

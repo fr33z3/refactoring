@@ -14,9 +14,7 @@ class Combiner
   end
 
   def each
-    while values.any?
-      yield iteration_values!
-    end
+    yield iteration_values! while values.any?
   end
 
   private
@@ -30,7 +28,7 @@ class Combiner
   end
 
   def values
-    enumerators.map{|enum| get_value(enum)}
+    enumerators.map { |enum| get_value(enum) }
   end
 
   def min_value

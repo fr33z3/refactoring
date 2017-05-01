@@ -1,0 +1,15 @@
+Metrics/LineLength:
+  Max: 100
+
+# Offense count: 2
+# Cop supports --auto-correct.
+Performance/StringReplacement:
+  Exclude:
+    - 'lib/extensions.rb'
+
+Style/Documentation:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
