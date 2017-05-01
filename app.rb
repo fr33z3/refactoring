@@ -3,6 +3,7 @@ require_relative 'lib/modifier'
 require_relative 'lib/extensions'
 require_relative 'lib/csv_file_manager'
 require_relative 'lib/merger'
+require_relative 'lib/splitted_writer'
 require 'date'
 
 MODIFICATION_FACTOR = 1

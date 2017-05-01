@@ -13,8 +13,6 @@ class Modifier
   CANCELATION_KEYS = ['number of commissions']
   CANCELATION_SALE_KEYS = ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value']
 
-  LINES_PER_FILE = 120000
-
   def initialize(saleamount_factor, cancellation_factor, sort_key, file_manager = CSVFileManager.new)
     @saleamount_factor = saleamount_factor
     @cancellation_factor = cancellation_factor
@@ -22,42 +20,23 @@ class Modifier
     @sort_key = sort_key
   end
 
-  def modify(output, input)
-    @input = input
+  def modify(input, output)
+    writer = SplittedWriter.new(file_manager, output)
+    merger = Merger.new(modifiers, combiner(input))
 
-    merger = Merger.new(modifiers, combiner).to_enum(:each)
-
-    done = false
-    file_index = 0
-    file_name = output.gsub('.txt', '')
-    headers = merger.peek.keys
-    while not done do
-      file_manager.write(file_name + "_#{file_index}.txt", headers) do |csv|
-        line_count = 0
-        while line_count < LINES_PER_FILE
-          begin
-            csv << merger.next.values
-            line_count += 1
-          rescue StopIteration
-            done = true
-            break
-          end
-        end
-        file_index += 1
-      end
+    merger.each do |row|
+      writer.write(row)
     end
+    writer.close
   end
 
   private
 
-  attr_reader :file_manager, :cancellation_factor, :saleamount_factor, :sort_key
+  attr_reader :file_manager, :cancellation_factor, :saleamount_factor, :sort_key, :input
 
-  def input_enum
-    file_manager.read_sorted(@input, sort_key).each
-  end
-
-  def combiner
-    Combiner.new(input_enum) { |value| value[KEYWORD_UNIQUE_ID] }
+  def combiner(input)
+    enum = file_manager.read_sorted(input, sort_key).each
+    Combiner.new(enum) { |value| value[KEYWORD_UNIQUE_ID] }
   end
 
   def modifiers

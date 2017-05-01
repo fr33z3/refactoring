@@ -29,33 +29,4 @@ RSpec.describe CSVFileManager do
     it { is_expected.to be_instance_of(Enumerator) }
     it { is_expected.to return_elements(*rows) }
   end
-
-  describe '#write' do
-    subject { csv }
-
-    context 'when content provided' do
-      before do
-        allow(CSV).to receive(:open).with(file_path, "wb", default_options).and_yield csv
-        manager.write(file_path, headers, rows)
-      end
-
-      it { is_expected.to have_received(:<<).with(headers) }
-      it { is_expected.to have_received(:<<).with(rows[0]) }
-      it { is_expected.to have_received(:<<).with(rows[1]) }
-    end
-
-    context 'when block provided' do
-      before do
-        allow(CSV).to receive(:open).with(file_path, "wb", default_options).and_yield csv
-        manager.write(file_path, headers) do |csv|
-          csv << rows[0]
-          csv << rows[1]
-        end
-      end
-
-      it { is_expected.to have_received(:<<).with(headers) }
-      it { is_expected.to have_received(:<<).with(rows[0]) }
-      it { is_expected.to have_received(:<<).with(rows[1]) }
-    end
-  end
 end

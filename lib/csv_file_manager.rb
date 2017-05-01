@@ -30,15 +30,8 @@ class CSVFileManager
     end
   end
 
-  def write(file_path, headers, content = nil)
-    CSV.open(file_path, "wb", options) do |csv|
-      csv << headers
-      if block_given?
-        yield csv
-      elsif content
-        content.each{|row| csv << row}
-      end
-    end
+  def open_write(file_path)
+    CSV.open(file_path, 'wb', options)
   end
 
   private

@@ -1,6 +1,4 @@
 class Merger
-  include Enumerable
-
   def initialize(modifiers, combiner)
     @modifiers = modifiers
     @combiner = combiner
