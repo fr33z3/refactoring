@@ -13,31 +13,24 @@ class Modifier
   CANCELATION_KEYS = ['number of commissions']
   CANCELATION_SALE_KEYS = ['Commission Value', 'ACCOUNT - Commission Value', 'CAMPAIGN - Commission Value', 'BRAND - Commission Value', 'BRAND+CATEGORY - Commission Value', 'ADGROUP - Commission Value', 'KEYWORD - Commission Value']
 
-  def initialize(saleamount_factor, cancellation_factor, sort_key, file_manager = CSVFileManager.new)
+  def initialize(saleamount_factor, cancellation_factor)
     @saleamount_factor = saleamount_factor
     @cancellation_factor = cancellation_factor
-    @file_manager = file_manager
-    @sort_key = sort_key
   end
 
-  def modify(input, output)
-    writer = SplittedWriter.new(file_manager, output)
-    merger = Merger.new(modifiers, combiner(input))
+  def modify(inputs, output_writer)
+    combiner = Combiner.new(*inputs) { |value| value[KEYWORD_UNIQUE_ID] }
+    merger = Merger.new(modifiers, combiner)
 
     merger.each do |row|
-      writer.write(row)
+      output_writer.write(row)
     end
-    writer.close
+    output_writer.close
   end
 
   private
 
-  attr_reader :file_manager, :cancellation_factor, :saleamount_factor, :sort_key, :input
-
-  def combiner(input)
-    enum = file_manager.read_sorted(input, sort_key).each
-    Combiner.new(enum) { |value| value[KEYWORD_UNIQUE_ID] }
-  end
+  attr_reader :cancellation_factor, :saleamount_factor
 
   def modifiers
     [
