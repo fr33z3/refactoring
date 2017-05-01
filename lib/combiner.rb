@@ -43,7 +43,7 @@ class Combiner
     min = min_value
     enumerators.map do |enum|
       value = get_value(enum)
-      if value == min
+      if value && extractor.call(value) == extractor.call(min)
         enum.next
         value
       end
